@@ -1,20 +1,11 @@
-var express = require('express');
+var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var port = process.env.PORT || 3000;
-var app = express();
-
-app.use(express.static(__dirname + '/public'));
 
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
-
-// io.on('connection', function(socket){
-//   socket.on('chat message', function(msg){
-//     io.emit('chat message', msg);
-//   });
-// });
 
 http.listen(port, function(){
   console.log('listening on *:' + port);
@@ -29,16 +20,10 @@ var sp = new serialport(portName, {
     stopBits: 1,
     flowControl: false,
     parser: new serialport.parsers.Readline()
-
-    // parser: new serialport.parsers.Delimiter({ delimiter: Buffer.from('EOL') })
 });
 
 
 sp.on('open', function(){
-  // console.log('Serial Port Opend');
-  // sp.on('data', function(data){
-  //     console.log(data);
-  // });
   let string = []
   sp.on('data', function(input) {
   	string.push(input.toString());
@@ -46,6 +31,7 @@ sp.on('open', function(){
   	let regex = /uS\/cm\r\n/;
   	if(string.join("").match(regex)) {
   		console.log(string.join(""));
+
   		let data = string.join("");
   		let tempRegEx = /Air\sTemperature:\s(.+)\*/;
   		let humRegEx = /Humidity:\s(.+)%/;
@@ -59,32 +45,13 @@ sp.on('open', function(){
   		let pH = data.match(phRegEx)[1];
   		let conductivity = data.match(conductivityRegEx)[1];
 
-  		console.log(temp)
-  		console.log(humidity)
-  		console.log(water_temp)
-  		console.log(pH)
-  		console.log(conductivity)
 	    io.emit('temperature', temp);
 	   	io.emit('humidity', humidity);
 	    io.emit('water_temperature', water_temp);
 	    io.emit('pH', pH);
 	    io.emit('conductivity', conductivity);
 
-
-		// Air Temperature: 33.70*C
-		// Air Humidity: 32.00% RH
-		// Water Temperature: 33.19*C
-		// Luminosity: 0%
-		// pH Level: 7.94
-		// Conductivity: 15.12uS/cm
-
+    	string = []
   	}
-  	// console.log(string.join(""));
   });
-
 });
-
-// sp.on('data', function(input) {
-//     console.log(input.toString());
-//     io.emit('temperature', input.toString());
-// });
