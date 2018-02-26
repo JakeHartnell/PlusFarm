@@ -6,7 +6,7 @@ let serialport = require('serialport');
 let fs = require('fs');
 
 app.get('/', function(req, res){
-  res.sendFile(__dirname + '/webcomponent/demo.html');
+  res.sendFile(__dirname + '/index.html');
 });
 
 http.listen(port, function(){
